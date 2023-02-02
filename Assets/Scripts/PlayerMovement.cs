@@ -6,6 +6,8 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField]
     private float speed;
+    [SerializeField]
+    private float jumpForce;
     private Rigidbody2D body;
     private Animator anim;
     private BoxCollider2D boxCollider;
@@ -13,6 +15,27 @@ public class PlayerMovement : MonoBehaviour
     private LayerMask groundLayer;
     [SerializeField]
     private LayerMask wallLayer;
+    private float movementInputDirection;
+
+    private bool isFacingRight = true;
+
+    private bool isWalking;
+    private bool isGrounded;
+    private bool isWall;
+    private bool isDashing;
+    [SerializeField]
+    private float dashTime;
+    [SerializeField]
+    private float dashSpeed;
+    [SerializeField]
+    private float distanceBetweenImages;
+    [SerializeField]
+    private float dashCooldown;
+    private float dashTimeLeft;
+    private float lastImageXpos;
+    private float lastDash = -100f;
+    private bool canMove = true;
+    private bool canFlip = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,55 +44,127 @@ public class PlayerMovement : MonoBehaviour
         boxCollider = GetComponent<BoxCollider2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    void Update() 
     {
-        float x_input = Input.GetAxis("Horizontal");
-        
-        if (!wallCollision()) 
-        {
-            body.velocity = new Vector2(x_input * speed, body.velocity.y);
-        }
+        CheckInput();
+        CheckMovementDirection();
+        UpdateAnimations();
+        checkDash();
+    }
+    private void FixedUpdate() 
+    {
+        ApplyMovement();
+        checkSurroundings();
+    }
 
-        if (x_input > 0.01f)
-        {
-            transform.localScale = Vector3.one;
-        }
-        if (x_input < -0.01f)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
-
-        if (Input.GetKey(KeyCode.Space) && isGrounded())
+    private void CheckInput()
+    {
+        movementInputDirection = Input.GetAxisRaw("Horizontal");
+        if (Input.GetKey(KeyCode.Space) && isGrounded)
         {
             Jump();
         }
-        // Set animator parameter
-        anim.SetBool("run", x_input != 0);
-        anim.SetBool("grounded", isGrounded());
-        Debug.Log(isGrounded());
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            AttemptToDash();
+        }
+    }
+
+    private void AttemptToDash()
+    {
+        if (Time.time - lastDash < dashCooldown)
+        {
+            return;
+        }
+        isDashing = true;
+        dashTimeLeft = dashTime;
+        lastDash = Time.time;
+        PlayerAfterImagePool.Instance.GetFromPool();
+        lastImageXpos = transform.position.x;
+    }
+
+    private void checkDash()
+    {
+        if (isDashing)
+        {
+            if (dashTimeLeft > 0 && !isWall)
+            {
+                canMove = false;
+                canFlip = false;
+                body.velocity = new Vector2(dashSpeed * transform.localScale.x, body.velocity.y);
+                dashTimeLeft -= Time.deltaTime;
+
+                if (Mathf.Abs(transform.position.x - lastImageXpos) > distanceBetweenImages)
+                {
+                    PlayerAfterImagePool.Instance.GetFromPool();
+                    lastImageXpos = transform.position.x;
+                }
+            }
+            if (dashTimeLeft <= 0 || isWall)
+            {
+                isDashing = false;
+                canMove = true;
+                canFlip = true;
+            }
+        }
+    }
+
+    private void ApplyMovement()
+    {
+        if (canMove && !isWall)
+        {
+            body.velocity = new Vector2(movementInputDirection * speed, body.velocity.y);
+        }
+        
+    }
+
+    private void CheckMovementDirection()
+    {
+        if ((isFacingRight && movementInputDirection < 0 || !isFacingRight && movementInputDirection > 0) && canFlip)
+        {
+            Flip();
+        }
+        if (body.velocity.x != 0)
+        {
+            isWalking = true;
+        } else {
+            isWalking = false;
+        }
+        isFacingRight = !isFacingRight;
+    }
+    
+    private void Flip()
+    {
+        if (movementInputDirection > 0)
+        {
+            transform.localScale = Vector3.one;
+        }
+        if (movementInputDirection < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
     }
 
     private void Jump()
     {
-        body.velocity = new Vector2(body.velocity.x, speed);
-        anim.SetTrigger("takeOff");
-
+        body.velocity = new Vector2(body.velocity.x, jumpForce);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision) {
-
-    }
-
-    private bool isGrounded()
+    private void UpdateAnimations()
     {
-        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.01f, groundLayer);
-        return raycastHit.collider != null;
+        anim.SetBool("isWalking", isWalking);
+        anim.SetBool("isGrounded", isGrounded);
+        anim.SetFloat("yVelocity", body.velocity.y);
     }
 
-    private bool wallCollision()
+    private void checkSurroundings()
     {
-        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.01f, wallLayer);
-        return raycastHit.collider != null;
+        RaycastHit2D hitGround = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.01f, groundLayer);
+        isGrounded = hitGround.collider != null;
+
+        RaycastHit2D hitWall = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.01f, wallLayer);
+        isWall = hitWall.collider != null;
     }
+
+    
 }
