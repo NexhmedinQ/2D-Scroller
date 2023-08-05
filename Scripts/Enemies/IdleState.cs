@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class IdleState : States
 {
-    protected float minIdle = 1f;
-    protected float maxIdle = 2f;
+    protected float minIdle = 0.5f;
+    protected float maxIdle = 1.5f;
     protected float randomIdle;
     protected bool isIdleTimeOver;
+    protected bool isPlayerInAgro;
 
     public IdleState(Entity entity, StateMachine stateMachine, string animParam) : base(entity, stateMachine, animParam)
     {
@@ -37,5 +38,8 @@ public class IdleState : States
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
+    }
+    public override void DoChecks() {
+        isPlayerInAgro = entity.isPlayerInAgro();
     }
 }

@@ -18,8 +18,9 @@ public class WizardIdleState : IdleState
     public override void LogicUpdate()
     {
         base.LogicUpdate();
-        if (isIdleTimeOver)
-        {
+        if (isPlayerInAgro) {
+            machine.ChangeState(wizard.playerDetectedState);
+        } else if (isIdleTimeOver) {
             machine.ChangeState(wizard.moveState);
         }
     }

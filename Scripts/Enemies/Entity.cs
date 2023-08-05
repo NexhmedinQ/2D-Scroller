@@ -1,8 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Entity : MonoBehaviour
+public abstract class Entity : MonoBehaviour, IDamage
 {
     public StateMachine machine;
     public Animator anim { get; private set; }   
@@ -10,16 +11,26 @@ public class Entity : MonoBehaviour
     private float wallCheck;
     [SerializeField]
     private float ledgeCheck;
+    // [SerializeField]
+    // private Transform playerCheck;
     [SerializeField]
-    private Transform playerCheck;
-    [SerializeField]
-    private LayerMask playerLayer;
-    private BoxCollider2D boxCollider;
+    protected LayerMask playerLayer;
+    protected BoxCollider2D boxCollider;
     [SerializeField]
     private LayerMask groundLayer;
     private Rigidbody2D body;
     [SerializeField]
     private float movementSpeed;
+    private float currentHealth;
+    private float maxHealth;
+    [SerializeField]
+    protected float minAgroRange;
+    [SerializeField]
+    protected float maxAgroRange;
+    [SerializeField]
+    protected float meleeRange;
+    [SerializeField]
+    protected float longRange;
 
     public virtual void Awake() 
     {
@@ -27,6 +38,9 @@ public class Entity : MonoBehaviour
         boxCollider = GetComponent<BoxCollider2D>();
         body = GetComponent<Rigidbody2D>();
         machine = new StateMachine();
+    }
+    public virtual void Start() {
+        CombatHandler.Instance.TakeDamage += HandleAttack;
     }
 
     public virtual void Update()
@@ -44,9 +58,9 @@ public class Entity : MonoBehaviour
         return false;
     } 
 
-    public bool isPlayerInAgro()
+    public virtual bool isPlayerInAgro()
     {
-        return false;
+        return Physics2D.Raycast(new Vector2(boxCollider.bounds.max.x, boxCollider.bounds.center.y), new Vector2(transform.localScale.x, 0), wallCheck, playerLayer);
     }
 
     public bool wallCollision()
@@ -73,10 +87,22 @@ public class Entity : MonoBehaviour
             return !Physics2D.Raycast(new Vector2(boxCollider.bounds.min.x, boxCollider.bounds.min.y), Vector2.down, ledgeCheck, groundLayer);
         }
     }
-
-    protected float facingDirection()
+    // positive is facing right
+    public float facingDirection()
     {
         return transform.localScale.x;
+    }
+
+    public bool InMeleeRange() {
+        return Physics2D.Raycast(new Vector2(boxCollider.bounds.center.x, boxCollider.bounds.center.y), new Vector2(transform.localScale.x, 0), meleeRange, playerLayer);
+    }
+
+    public bool InRangedAttackRange() {
+        return Physics2D.Raycast(new Vector2(boxCollider.bounds.center.x, boxCollider.bounds.center.y), new Vector2(transform.localScale.x, 0), longRange, playerLayer);
+    }
+
+    public bool PlayerOnRight() {
+        return Physics2D.Raycast(new Vector2(boxCollider.bounds.center.x, boxCollider.bounds.center.y), new Vector2(1, 0), maxAgroRange, playerLayer);
     }
 
     public void setVelocity()
@@ -100,4 +126,18 @@ public class Entity : MonoBehaviour
         }
         
     }
+
+    public virtual void Damage(float damage)
+    {
+        currentHealth = currentHealth - damage;
+    }
+
+    protected virtual void HandleAttack(IDamage target, float damage)
+    {
+        if (this == target) {
+            Damage(damage);
+        }
+    }
+
+   
 }

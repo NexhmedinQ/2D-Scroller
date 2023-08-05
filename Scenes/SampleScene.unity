@@ -506,7 +506,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 347229587}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.5, y: -1, z: 0}
+  m_LocalPosition: {x: 4.539, y: -1.338, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3147,14 +3147,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallCheck: 0.2
   ledgeCheck: 0.1
-  playerCheck: {fileID: 0}
   playerLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   movementSpeed: 1.5
+  minAgroRange: 2
+  maxAgroRange: 5
 --- !u!61 &1261861660
 BoxCollider2D:
   m_ObjectHideFlags: 0

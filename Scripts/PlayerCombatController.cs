@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCombatController : MonoBehaviour
+public class PlayerCombatController : MonoBehaviour, IDamage
 {
 
     [SerializeField]
@@ -16,43 +16,45 @@ public class PlayerCombatController : MonoBehaviour
     private Transform attack1HitBox;
     [SerializeField]
     private LayerMask damageable;
+    [SerializeField]
+    private float maxHealth;
+    private float currHealth;
     
     private void Start() 
     {
         anim = GetComponent<Animator>();    
         anim.SetBool("canAttack", combatEnabled);
+        CombatHandler.Instance.TakeDamage += HandleAttack;
+        currHealth = maxHealth;
     }
     private void Update() 
     {
         checkCombatInput();
         checkAttacks();
     }
+    private void OnDestroy() {
+        CombatHandler.Instance.TakeDamage -= HandleAttack;
+    }
     
     private void checkCombatInput()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && combatEnabled)
         {
-            if (combatEnabled)
-            {
-                gotInput = true;
-                lastInputTime = Time.time;
-            }
+            gotInput = true;
+            lastInputTime = Time.time;
         }
     }
 
     private void checkAttacks()
     {
-        if (gotInput)
+        if (gotInput && !isAttacking)
         {
-            if (!isAttacking)
-            {
-                gotInput = false;
-                isAttacking = true;
-                isFirstAttack = !isFirstAttack;
-                anim.SetBool("attack1", true);
-                anim.SetBool("firstAttack", isFirstAttack);
-                anim.SetBool("isAttacking", isAttacking);
-            }
+            gotInput = false;
+            isAttacking = true;
+            isFirstAttack = !isFirstAttack;
+            anim.SetBool("attack1", true);
+            anim.SetBool("firstAttack", isFirstAttack);
+            anim.SetBool("isAttacking", isAttacking);
         }
         if (Time.time >= lastInputTime + inputTimer)
         {
@@ -80,5 +82,19 @@ public class PlayerCombatController : MonoBehaviour
     private void OnDrawGizmos() 
     {
         Gizmos.DrawWireSphere(attack1HitBox.position, attack1Radius);
+    }
+
+    private void HandleAttack(IDamage target, float damage) {
+        if (this == target) {
+            Damage(damage);
+        }
+    }
+
+    public void Damage(float damage)
+    {
+        currHealth = currHealth - damage;
+        if (currHealth < 0) {
+            // dead
+        }
     }
 }

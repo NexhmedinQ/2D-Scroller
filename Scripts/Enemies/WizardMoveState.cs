@@ -14,8 +14,9 @@ public class WizardMoveState : MoveState
     public override void LogicUpdate()
     {
         base.LogicUpdate();
-        if ( entity.wallCollision() || entity.noGround())
-        {
+        if (isPlayerInAgro) {
+            machine.ChangeState(wizard.playerDetectedState);
+        } else if ( entity.wallCollision() || entity.noGround()) {
             machine.ChangeState(wizard.idleState);
         }
     }

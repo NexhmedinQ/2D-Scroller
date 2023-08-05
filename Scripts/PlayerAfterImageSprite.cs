@@ -23,7 +23,7 @@ public class PlayerAfterImageSprite : MonoBehaviour
 
         alpha = alphaSet;
         sr.sprite = playerSprite.sprite;
-        // distance between image and player is currently hardcoded (need to change this) (maybe a getter from the player movement class)
+        
         if (player.localScale.x == -1) 
         {
             transform.position = player.position + new Vector3(0.15f, 0, 0);

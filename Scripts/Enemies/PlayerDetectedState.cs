@@ -1,18 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class MoveState : States
+public class PlayerDetectedState : States
 {
     protected bool isPlayerInAgro;
-    public MoveState(Entity entity, StateMachine stateMachine, string animParam) : base(entity, stateMachine, animParam)
+    protected bool facingRight;
+    protected bool playerOnRight;
+    public PlayerDetectedState(Entity entity, StateMachine stateMachine, string animParam) : base(entity, stateMachine, animParam)
     {
     }
 
     public override void Enter()
     {
         base.Enter();
-        entity.setVelocity();
     }
 
     public override void Exit()
@@ -22,15 +19,17 @@ public class MoveState : States
 
     public override void LogicUpdate()
     {
-        base.LogicUpdate();
-        entity.setVelocity();
+        base.LogicUpdate(); 
     }
 
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
     }
+
     public override void DoChecks() {
         isPlayerInAgro = entity.isPlayerInAgro();
+        facingRight = entity.facingDirection() > 0;
+        playerOnRight = entity.PlayerOnRight();
     }
 }
