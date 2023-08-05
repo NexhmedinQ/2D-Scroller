@@ -22,6 +22,7 @@ public abstract class Entity : MonoBehaviour, IDamage
     [SerializeField]
     private float movementSpeed;
     private float currentHealth;
+    [SerializeField]
     private float maxHealth;
     [SerializeField]
     protected float minAgroRange;
