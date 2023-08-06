@@ -14,7 +14,7 @@ public abstract class Entity : MonoBehaviour, IDamage
     // [SerializeField]
     // private Transform playerCheck;
     [SerializeField]
-    protected LayerMask playerLayer;
+    public LayerMask playerLayer;
     protected BoxCollider2D boxCollider;
     [SerializeField]
     private LayerMask groundLayer;
@@ -32,6 +32,17 @@ public abstract class Entity : MonoBehaviour, IDamage
     protected float meleeRange;
     [SerializeField]
     protected float longRange;
+    [SerializeField]
+    public float meleeDamage;
+    [SerializeField]
+    public float meleeRadius;
+    [SerializeField]
+    protected Transform attackPosition;
+    public StateTriggerAnim stateToAnim;
+    [SerializeField]
+    public float meleeCd;
+    [SerializeField]
+    public float rangedCd;
 
     public virtual void Awake() 
     {
@@ -39,6 +50,7 @@ public abstract class Entity : MonoBehaviour, IDamage
         boxCollider = GetComponent<BoxCollider2D>();
         body = GetComponent<Rigidbody2D>();
         machine = new StateMachine();
+        stateToAnim = GetComponent<StateTriggerAnim>();
     }
     public virtual void Start() {
         CombatHandler.Instance.TakeDamage += HandleAttack;
@@ -130,7 +142,7 @@ public abstract class Entity : MonoBehaviour, IDamage
 
     public virtual void Damage(float damage)
     {
-        currentHealth = currentHealth - damage;
+        currentHealth -= damage;
     }
 
     protected virtual void HandleAttack(IDamage target, float damage)

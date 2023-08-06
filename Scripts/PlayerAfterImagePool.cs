@@ -11,6 +11,7 @@ public class PlayerAfterImagePool : MonoBehaviour
     public static PlayerAfterImagePool Instance { get; private set; }
 
     private void Awake() {
+        Debug.Log("pool created");
         Instance = this;
         GrowPool();
     }

@@ -22,7 +22,7 @@ public class PlayerCombatController : MonoBehaviour, IDamage
     
     private void Start() 
     {
-        anim = GetComponent<Animator>();    
+        anim = GetComponent<Animator>();
         anim.SetBool("canAttack", combatEnabled);
         CombatHandler.Instance.TakeDamage += HandleAttack;
         currHealth = maxHealth;
@@ -32,6 +32,7 @@ public class PlayerCombatController : MonoBehaviour, IDamage
         checkCombatInput();
         checkAttacks();
     }
+
     private void OnDestroy() {
         CombatHandler.Instance.TakeDamage -= HandleAttack;
     }
@@ -67,8 +68,12 @@ public class PlayerCombatController : MonoBehaviour, IDamage
         Collider2D[] detectedObjects = Physics2D.OverlapCircleAll(attack1HitBox.position, attack1Radius, damageable);
         for (int i = 0; i < detectedObjects.Length; i++)
         {
-            detectedObjects[i].transform.parent.SendMessage("Damage", attack1Damage);
-            // instantiate hit particle
+            IDamage enemy = detectedObjects[i].GetComponent<IDamage>();
+            if (enemy != null) 
+            {
+                CombatHandler.Instance.PerformAttack(enemy, attack1Damage);
+                // instantiate hit particle
+            }
         }
     }
 
@@ -85,7 +90,8 @@ public class PlayerCombatController : MonoBehaviour, IDamage
     }
 
     private void HandleAttack(IDamage target, float damage) {
-        if (this == target) {
+        if (this == target) 
+        {
             Damage(damage);
         }
     }
@@ -93,7 +99,8 @@ public class PlayerCombatController : MonoBehaviour, IDamage
     public void Damage(float damage)
     {
         currHealth = currHealth - damage;
-        if (currHealth < 0) {
+        if (currHealth < 0) 
+        {
             // dead
         }
     }

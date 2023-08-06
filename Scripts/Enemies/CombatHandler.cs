@@ -8,6 +8,7 @@ public class CombatHandler : MonoBehaviour
     public static CombatHandler Instance { get; private set; }
     private void Awake()
     {
+        Debug.Log("is being instantiated");
         if (Instance == null)
         {
             Instance = this;

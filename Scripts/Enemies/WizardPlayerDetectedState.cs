@@ -14,7 +14,7 @@ public class WizardPlayerDetectedState : PlayerDetectedState
     public override void Enter()
     {
         base.Enter();
-        detectTime = Random.Range(0.2f, 0.5f);
+        detectTime = Random.Range(0.5f, 0.8f);
         entity.zeroVelocity();
         if (facingRight && !playerOnRight || !facingRight & playerOnRight) {
             entity.Flip();
@@ -25,13 +25,15 @@ public class WizardPlayerDetectedState : PlayerDetectedState
         base.LogicUpdate();
         if (Time.time >= startTime + detectTime)
         {
-            if (isPlayerInAgro) {
+            if (isPlayerInAgro) 
+            {
+                machine.ChangeState(wizard.meleeState);
+            } else 
+            {
                 machine.ChangeState(wizard.moveState);
-            } else {
-                machine.ChangeState(wizard.idleState);
             }
         }
-        Debug.Log(facingRight);
+        //Debug.Log(facingRight);
     }
 
     public override void Exit()
@@ -41,7 +43,8 @@ public class WizardPlayerDetectedState : PlayerDetectedState
 
     public override void DoChecks() {
         base.DoChecks();
-        if (facingRight && !playerOnRight || !facingRight && playerOnRight) {
+        if (facingRight && !playerOnRight || !facingRight && playerOnRight) 
+        {
             entity.Flip();
         }
     }

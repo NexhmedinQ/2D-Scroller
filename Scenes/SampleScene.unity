@@ -577,7 +577,8 @@ MonoBehaviour:
   attack1HitBox: {fileID: 2080840536}
   damageable:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1024
+  maxHealth: 0
 --- !u!4 &471144555 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5605274326600701020, guid: 7bbe42af6c9f7f34fb3417063c0c679f, type: 3}
@@ -3154,8 +3155,13 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   movementSpeed: 1.5
+  maxHealth: 0
   minAgroRange: 2
   maxAgroRange: 5
+  meleeRange: 1.12
+  longRange: 2.79
+  meleeDamage: 1.5
+  meleeRadius: 0.69
 --- !u!61 &1261861660
 BoxCollider2D:
   m_ObjectHideFlags: 0
